@@ -2,15 +2,6 @@
 
 如何编译自己需要的 LEDE 固件 [How to build your LEDE firmware](./README_EN.md)
 
-## 官方讨论群
-如有技术问题需要讨论或者交流，欢迎加入以下群：
-1. QQ 讨论群： Op固件技术研究群 ,号码 891659613 ，加群链接：[点击加入](https://jq.qq.com/?_wv=1027&k=XL8SK5aC "Op固件技术研究群")
-2. TG 讨论群： OP 编译官方大群 ，加群链接：[点击加入](https://t.me/JhKgAA6Hx1 "OP 编译官方大群")
-3. Rockchip RK3568 预编译固件发布 Release 下载更新地址 (包括 H68K )：<https://github.com/coolsnowwolf/lede/releases/tag/20220716>
-
-<a href ="https://item.taobao.com/item.htm?spm=a230r.1.14.11.4bb55247rdHEAP&id=702787603594&ns=1&abbucket=17#detail
-"><img src="https://github.com/coolsnowwolf/lede/blob/master/doc/h68k.jpg?raw=true" width=600  /></a>
-
 ## 注意
 
 1. **不要用 root 用户进行编译**
@@ -19,7 +10,7 @@
 
 ## 编译命令
 
-1. 首先装好 Linux 系统，推荐 Debian 11 或 Ubuntu LTS
+1. 首先装好 Linux 系统，推荐 Debian 11 或 Ubuntu LTS，我使用都是GCP服务器编译的，网络畅通
 
 2. 安装编译依赖
 
@@ -32,20 +23,46 @@
    libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz \
    mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools \
    libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip \
-   vim wget xmlto xxd zlib1g-dev
+   vim wget xmlto xxd zlib1g-dev screen htop
    ```
 
 3. 下载源代码，更新 feeds 并选择配置
 
    ```bash
+   #下载源码
    git clone https://github.com/coolsnowwolf/lede
+   #下载OpenClash压缩包
+   wget https://github.com/vernesong/OpenClash/archive/refs/heads/master.zip
+   #解压OpenClash压缩包
+   unzip master.zip
+   ## 将源码中的 `luci-app-openclash` 文件夹拷贝到 `OpenWrt` 项目的 `Package` 目录
+   cp -r OpenClash-master/luci-app-openclash ./lede/package/
+   #adguardhome手动添加
+   wget https://github.com/rufengsuixing/luci-app-adguardhome/archive/refs/heads/master.zip
+   #将源码中的 `luci-app-adguardhome-master` 文件夹拷贝到到lede的package目录下
+   cp -r luci-app-adguardhome-master ./lede/package/
+   
    cd lede
    ./scripts/feeds update -a
    ./scripts/feeds install -a
    make menuconfig
    ```
+4. OpenWrt源码编译修改默认IP和修改feeds.conf.default
+   ```bash
+   #修改配置文件config_generate
+   nano ./lede/package/base-files/files/bin/config_generate
+   #找到192.168.1.1改成自己喜欢的ip（10.0.0.1）
 
-4. 下载 dl 库，编译固件
+   #修改feeds.conf.default,也可以添加第三方feed源
+   nano ./lede/feeds.conf.default 
+   取消helloworld注释，开启ssr安装
+   #src-git helloworld https://github.com/fw876/helloworld.git
+
+   #添加其他源
+   src-git small8 https://github.com/kenzok8/small-package
+   ```
+
+5. 下载 dl 库，编译固件
 （-j 后面是线程数，第一次编译推荐用单线程）
 
    ```bash
@@ -119,29 +136,4 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 5. 重新加载一下 shell 启动文件 `source ~/.bashrc`，然后输入 `bash` 进入 bash shell，就可以和 Linux 一样正常编译了
 
-## 特别提示
 
-1. 源代码中绝不含任何后门和可以监控或者劫持你的 HTTPS 的闭源软件， SSL 安全是互联网最后的壁垒。安全干净才是固件应该做到的；
-
-2. 想学习 OpenWrt 开发，但是摸不着门道？自学没毅力？基础太差？怕太难学不会？跟着佐大学 OpenWrt 开发入门培训班助你能学有所成
-报名地址：[点击报名](http://forgotfun.org/2018/04/openwrt-training-2018.html "报名")
-
-3. QCA IPQ60xx 开源仓库地址：<https://github.com/coolsnowwolf/openwrt-gl-ax1800>
-
-4. 存档版本仓库地址：<https://github.com/coolsnowwolf/openwrt>
-
-## 软路由介绍
-
-iKOOLCORE 硬酷R1 多网口小主机 - N5105/N6005 : Cube box, rest fun. 方寸之间，尽享乐趣
-
-(商品介绍页面 - 硬酷科技（支持花呗）)：
-[优惠券链接](https://taoquan.taobao.com/coupon/unify_apply.htm?sellerId=2208215115814&activityId=85fbaf791c4b45e9aaf5ec8e3d1cb2a9)
-[下单链接](https://item.taobao.com/item.htm?ft=t&id=682987219699)
-
-[![r1](doc/r1.jpg)](https://item.taobao.com/item.htm?ft=t&id=682025492099)
-
-## 捐贈
-
-如果你觉得此项目对你有帮助，可以捐助我们，以鼓励项目能持续发展，更加完善
-
- ![star](doc/star.png)
