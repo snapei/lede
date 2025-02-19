@@ -39,7 +39,7 @@ start()
     hydrid='('${pc}'P+'${ec}'E)'
   fi
 	
-	h=${g}' - '${a}${b}${c}${d}${e}${f}${hydrid}
+	h=${a}${b}${c}${d}${e}${f}${hydrid}
 
 	mkdir -p /tmp/sysinfo
 	echo $h > /tmp/sysinfo/model
